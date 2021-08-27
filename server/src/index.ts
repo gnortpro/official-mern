@@ -13,9 +13,9 @@ import cors from "cors";
 import { User } from "./entities/User";
 import { Post } from "./entities/Post";
 import { UserResolver } from "./resolvers/user";
-import { HelloResolver } from "./resolvers/Hello";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import { Context } from "./types/Context";
+import { PostResolver } from "./resolvers/post";
 
 const main = async () => {
   await createConnection({
@@ -54,7 +54,7 @@ const main = async () => {
       name: COOKIE_NAME,
       store: MongoStore.create({ mongoUrl }),
       cookie: {
-        maxAge: 1000 * 60 * 60,
+        maxAge: 1000 * 60,
         httpOnly: true, // FE cannot access the cookie
         secure: __prod__,
         sameSite: "strict", // protection against CSRF attacks
@@ -67,7 +67,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, UserResolver],
+      resolvers: [UserResolver, PostResolver],
       validate: false,
     }),
     context: ({ req, res }): Context => ({ req, res }),

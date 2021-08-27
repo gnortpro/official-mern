@@ -2,7 +2,7 @@ import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
 import argon2 from "argon2";
 import { UserMutationResponse } from "../types/UserMutationResponse";
 import { User } from "../entities/User";
-import { RegisterInput } from "../types/RegisterInput";
+import { RegisterInput } from "../types/UserRegisterInput";
 import { validateRegisterInput } from "../utils/validateRegisterInput";
 import { LoginInput } from "../types/LoginInput";
 import { Context } from "../types/Context";
@@ -131,7 +131,7 @@ export class UserResolver {
       res.clearCookie(COOKIE_NAME);
       req.session.destroy((error) => {
         if (error) {
-          resolve(error);
+          resolve(false);
         } else {
           resolve(true);
         }
