@@ -4,47 +4,48 @@ import { useRouter } from 'next/dist/client/router';
 import React from 'react';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
-import { MeDocument, MeQuery, RegisterInput, useRegisterMutation } from '../generated/graphql';
+import { LoginInput, MeDocument, MeQuery, useLoginMutation } from '../generated/graphql';
 import { mapFieldErrors } from '../helpers/mapFieldErrors';
 import { useCheckAuth } from '../utils/checkAuth';
 
-const Register = () => {
+const Login = () => {
     const router = useRouter();
     const toast = useToast();
 
-    const initialValues: RegisterInput = {
-        username: '',
-        password: '',
-        email: '',
-    };
-
     const { data: authData, loading: authLoading } = useCheckAuth();
 
-    const [registerUser, { loading: _registerLoading }] = useRegisterMutation();
+    const initialValues: LoginInput = {
+        usernameOrEmail: '',
+        password: '',
+    };
 
-    const onRegisterSubmit = async (values: RegisterInput, { setErrors }: FormikHelpers<RegisterInput>) => {
-        const response = await registerUser({
+    const [userLogin, { loading: _registerLoading }] = useLoginMutation();
+
+    const onLoginSubmit = async (values: LoginInput, { setErrors }: FormikHelpers<LoginInput>) => {
+        const response = await userLogin({
             variables: {
-                registerInput: values,
+                loginInput: values,
             },
             update(cache, { data }) {
-                if (data?.register.success) {
-                    cache.writeQuery<MeQuery>({ query: MeDocument, data: { me: data.register.user } });
+                // const meData = cache.readQuery({ query: MeDocument });
+                if (data?.login.success) {
+                    cache.writeQuery<MeQuery>({ query: MeDocument, data: { me: data.login.user } });
                 }
             },
         });
 
-        if (response.data?.register.errors) {
-            setErrors(mapFieldErrors(response.data.register.errors));
-        } else if (response.data?.register.user) {
+        if (response.data?.login.errors) {
+            setErrors(mapFieldErrors(response.data.login.errors));
+        } else if (response.data?.login.user) {
             toast({
-                title: 'Welcome',
-                description: response?.data.register.user.username,
+                title: 'Welcome back',
+                description: response?.data.login.user.username,
                 status: 'success',
                 duration: 5000,
                 position: 'top-right',
                 isClosable: true,
             });
+
             router.push('/');
         }
     };
@@ -59,10 +60,15 @@ const Register = () => {
                 </Flex>
             ) : (
                 <Wrapper>
-                    <Formik initialValues={initialValues} onSubmit={onRegisterSubmit}>
+                    <Formik initialValues={initialValues} onSubmit={onLoginSubmit}>
                         {({ isSubmitting }) => (
                             <Form>
-                                <InputField name="username" placeholder="Username" label="Username" type="text" />
+                                <InputField
+                                    name="usernameOrEmail"
+                                    placeholder="Username or Email"
+                                    label="Username or Email"
+                                    type="text"
+                                />
 
                                 <Box mt={4}>
                                     <InputField
@@ -73,12 +79,8 @@ const Register = () => {
                                     />
                                 </Box>
 
-                                <Box mt={4}>
-                                    <InputField name="email" placeholder="Email" label="Email" type="text" />
-                                </Box>
-
                                 <Button type="submit" colorScheme="teal" mt={4} isLoading={isSubmitting}>
-                                    Register
+                                    Login
                                 </Button>
 
                                 <Button type="button" colorScheme="gray" mt={4} ml={4} onClick={backToHome}>
@@ -93,4 +95,4 @@ const Register = () => {
     );
 };
 
-export default Register;
+export default Login;

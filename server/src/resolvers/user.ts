@@ -1,18 +1,25 @@
-import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
-import argon2 from "argon2";
-import { UserMutationResponse } from "../types/UserMutationResponse";
-import { User } from "../entities/User";
-import { RegisterInput } from "../types/UserRegisterInput";
-import { validateRegisterInput } from "../utils/validateRegisterInput";
-import { LoginInput } from "../types/LoginInput";
-import { Context } from "../types/Context";
-import { COOKIE_NAME } from "../constants";
+import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
+import argon2 from 'argon2';
+import { UserMutationResponse } from '../types/UserMutationResponse';
+import { User } from '../entities/User';
+import { RegisterInput } from '../types/UserRegisterInput';
+import { validateRegisterInput } from '../utils/validateRegisterInput';
+import { LoginInput } from '../types/LoginInput';
+import { Context } from '../types/Context';
+import { COOKIE_NAME } from '../constants';
 
 @Resolver()
 export class UserResolver {
+  @Query((_return) => User, { nullable: true })
+  async me(@Ctx() { req }: Context): Promise<User | null | undefined> {
+    if (!req.session.userId) return null;
+    const user = await User.findOne(req.session.userId);
+    return user;
+  }
+
   @Mutation((_return) => UserMutationResponse)
   async register(
-    @Arg("registerInput") registerInput: RegisterInput,
+    @Arg('registerInput') registerInput: RegisterInput,
     @Ctx() { req }: Context
   ): Promise<UserMutationResponse> {
     const validator = validateRegisterInput(registerInput);
@@ -30,13 +37,13 @@ export class UserResolver {
           code: 400,
           success: false,
           message: `Duplicated ${
-            existingUser.username === username ? "username" : "email"
+            existingUser.username === username ? 'username' : 'email'
           }`,
           errors: [
             {
-              field: existingUser.username === username ? "username" : "email",
+              field: existingUser.username === username ? 'username' : 'email',
               message: `${
-                existingUser.username === username ? "Username" : "Email"
+                existingUser.username === username ? 'Username' : 'Email'
               } already taken`,
             },
           ],
@@ -57,7 +64,7 @@ export class UserResolver {
       return {
         code: 200,
         success: true,
-        message: "User registered successfully",
+        message: 'User registered successfully',
         user: newUser,
       };
     } catch (err) {
@@ -71,11 +78,11 @@ export class UserResolver {
 
   @Mutation((_return) => UserMutationResponse)
   async login(
-    @Arg("loginInput") { usernameOrEmail, password }: LoginInput,
+    @Arg('loginInput') { usernameOrEmail, password }: LoginInput,
     @Ctx() { req }: Context
   ): Promise<UserMutationResponse> {
     try {
-      const checkEmailOrUser = usernameOrEmail.includes("@");
+      const checkEmailOrUser = usernameOrEmail.includes('@');
       const existingUser = await User.findOne(
         checkEmailOrUser
           ? { email: usernameOrEmail }
@@ -86,11 +93,11 @@ export class UserResolver {
         return {
           code: 400,
           success: false,
-          message: "User not found",
+          message: 'User not found',
           errors: [
             {
-              field: "usernameOrEmail",
-              message: `${checkEmailOrUser ? "Email" : "Username"} incorrect`,
+              field: 'usernameOrEmail',
+              message: `${checkEmailOrUser ? 'Email' : 'Username'} incorrect`,
             },
           ],
         };
@@ -104,8 +111,8 @@ export class UserResolver {
         return {
           code: 400,
           success: false,
-          message: "Wrong password",
-          errors: [{ field: "password", message: "Wrong password" }],
+          message: 'Wrong password',
+          errors: [{ field: 'password', message: 'Wrong password' }],
         };
 
       req.session.userId = existingUser.id;
@@ -114,7 +121,7 @@ export class UserResolver {
         code: 200,
         success: true,
         user: existingUser,
-        message: "Login successfully",
+        message: 'Login successfully',
       };
     } catch (err) {
       return {

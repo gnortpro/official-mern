@@ -1,13 +1,13 @@
-import { ChakraProvider } from "@chakra-ui/react";
-import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+import { ChakraProvider } from '@chakra-ui/react';
+import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 
-import theme from "../theme";
-import { AppProps } from "next/app";
+import theme from '../theme';
+import { AppProps } from 'next/app';
 
 const client = new ApolloClient({
-  uri: "http://localhost:4000/graphql",
+  uri: 'http://localhost:4000/graphql',
   cache: new InMemoryCache(),
-  credentials: "include",
+  credentials: 'include',
 });
 
 function MyApp({ Component, pageProps }: AppProps) {

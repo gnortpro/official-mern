@@ -1,11 +1,6 @@
-import {
-  FormLabel,
-  Input,
-  FormControl,
-  FormErrorMessage,
-} from "@chakra-ui/react";
-import { useField } from "formik";
-import React from "react";
+import { FormLabel, Input, FormControl, FormErrorMessage } from '@chakra-ui/react';
+import { useField } from 'formik';
+import React from 'react';
 
 interface IProps {
   name: string;

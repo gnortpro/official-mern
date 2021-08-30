@@ -1,6 +1,10 @@
-import React from "react";
-import Register from "./register";
+import React from 'react';
+import Navbar from '../components/Navbar';
 
-const Index = () => <Register />;
+const Index = () => (
+  <>
+    <Navbar />
+  </>
+);
 
 export default Index;
